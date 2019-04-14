@@ -89,7 +89,7 @@ UDB = USER DEBUG BUILD
 		or 
 	$ make -j16
 
-	-> -j8 is more stable then -j16 i would adive not exceed the j8 limit
+	-> -j8 is more stable then -j16 i would adivce not to exceed the j8 limit
 
 	//////////////////https://source.android.com/setup/build/building/////////////////////////
 
