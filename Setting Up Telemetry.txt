@@ -1,0 +1,161 @@
+UDB = USER DEBUG BUILD  
+
+-> Make sure your system meets the requirement
+-> This is the main link you will using to install telemetry (Remember only Google Phones are supported who's UDB is accessible)
+	https://chromium.googlesource.com/chromium/src/+/master/docs/android_build_instructions.md#System-requirements
+-> You need to pause before Two steps
+	=> Setting up the build
+	=> Build Chromium
+
+	== Setting up the build ==
+	 -> First Read the Setting up the build without IMPLEMENTATION
+	 -> You will see that first need Figure out target_cpu
+	 -> First find your CPU by running "adb shell getprop ro.product.cpu.abi"
+	 -> Now the target_cpu accordingly
+
+
+	== Build Chromium ==
+	 -> Before Running  "autoninja -C out/Default chrome_public_apk" read the Multiple Chrome APK Targets first to know the exact version of chrome (all of the following commands will be changed accordingly to your choice)
+
+-> You need to only follow the link till "Build Content shell" 
+-> After that you need set User Debug Build on your Device
+-> USER DEBUG BUILD is the big brother of rooting your phone.
+-> If you have the USER DEBUG BUILD files available for your device then you are in LUCK. Skip to step of flashing UDB
+
+	-> if the above is not true, then my condolences, becuase now you have to build the OS from source code.
+	-> First You need to find see that if you have the Driver available for the UDB version you want e.g Android 7.1.1 or Android 8.0.1 or Android 6.1.0. If Driver are not available of the build you want you can try build without the drivers but that would mostly result in boot loop after flashing (Worth a try if you absolutely need that version)
+			Link for Driver Availability https://developers.google.com/android/drivers
+	-> Requirement for UDB
+			Android 4.4 => Open_JDK_6
+			Android 6 => Open_JDK_7
+			Android 7 => Open_JDK_8
+			Android 8 => Open_JDK_8
+
+			Only open JDK would work (U need java,javac,javaws,javadoc all on the same version) you can have multiple java version simultaneously just run the command to config your java
+			sudo update-alternatives --config ____
+			Fill the blank with these (java,javac,javaws,javadoc) one at a time
+			If javaws is not available for your version you can try build without it and hope it does not give the error but 90% of the time it gives error
+
+
+
+	-> Now You would need a lot of Space (e.g 350~400 GB free space for whole process) Requirements can be check on https://source.android.com/setup/build/requirements
+
+	-> I Assume you have checked the drivers and for your device and are selecting same build number who's driver are available
+			LINK for BUILD NUMBERS https://source.android.com/setup/start/build-numbers.html
+	-> You do not need to absolutely choose same number build number your phone is already on u can install any version considering that build is supported by your device and drivers all also available. e.g You can have a nexus 5x UDB on Android 7.1.1 and other on Android 8.0.0.
+	-> You would need a GitHub account u haven't already got it then stop here and create it first
+	-> Now follow this link https://source.android.com/setup/build/downloading The step 3 of Initializing a Repo client is run with -b flag followed by your exact android number (You need To check out a branch other than "master"). You can get the exact number https://source.android.com/setup/start/build-numbers.html
+	-> You only need to Follow the above page till "repo sync" Now your download have begun (~200 GB) It will take time depending upon you Connection
+	-> After you have downloaded the build the you would need to install the Drives for your build
+		follow this LINK https://developers.google.com/android/drivers
+
+	For Example I would be running build number M4B30X
+
+	Download the corresponding binaries:
+	$ cd ~/Downloads
+
+	You can wget or direct download depending upon your choice
+
+	$ wget https://dl.google.com/dl/android/aosp/broadcom-hammerhead-m4b30x-7c7b231f.tgz
+	$ wget https://dl.google.com/dl/android/aosp/lge-hammerhead-m4b30x-74fa3aa5.tgz  
+	$ wget https://dl.google.com/dl/android/aosp/qcom-hammerhead-m4b30x-158606cf.tgz
+
+	Verify the integrity of each download: (This Step is optional Do it if want to be extra cautious)
+
+	 $ echo "01a03cf36b20ee2460d108c1d199f4b012b084368cddfbff1e40ff8270b54d6f broadcom-hammerhead-m4b30x-7c7b231f.tgz" | sha256sum -c
+	 $ echo "a533f4c82d430181b97ab2321acf10ab1e2b126de7bb15437c969331541af7cb lge-hammerhead-m4b30x-74fa3aa5.tgz" | sha256sum -c
+	 $ echo "9a2760bda79e3be7bbe7203c05273c80b0d043d9aaf15be20361e35b16ef8905 qcom-hammerhead-m4b30x-158606cf.tgz" | sha256sum -c
+
+	Extract each gzip file: (you must use these commands for extracting the files)
+
+	 $ tar xzvf broadcom-hammerhead-m4b30x-7c7b231f.tgz  
+	 $ tar xzvf lge-hammerhead-m4b30x-74fa3aa5.tgz    
+	 $ tar xzvf qcom-hammerhead-m4b30x-158606cf.tgz
+
+	Execute the resulting self-extracting files from the source tree's root folder(WORKING_DIRECTORY)
+
+	$ cd ~/ WORKING_DIRECTORY
+	$ ~/Downloads/extract-broadcom-hammerhead.sh
+	$ ~/Downloads/extract-lge-hammerhead.sh
+	$ ~/Downloads/extract-qcom-hammerhead.sh 
+
+	After executing each file hit the Enter key once and then hit the Space bar until you reach the end of each document (It normally goes till Section 8e). At the end of each document type:
+
+	    I ACCEPT
+
+	and hit the Enter key.
+
+	///////////////////These Command are also standard procedure of building///////////////////
+
+	To accommodate the new binaries you must initiate a full rebuild, so set the environment:
+	$ . build/envsetup.sh
+	$ lunch aosp_hammerhead-userdebug (hammerhead was the name of build for Nexus 5x)
+		You can check the name of your build:
+			https://developers.google.com/android/drivers (Search for your device Name (5x name was hammerhead))
+	
+	And make the synthetic target 'clobber' in order to clean:
+
+	$ make clobber
+
+	Before Building Check for error section below
+	Now rebuild: (If you're running a 2 Core CPU (i5 6200U))
+
+	 $ make -j4  
+
+	(Or, if you're running something bigger)
+
+	$ make -j8 
+		or 
+	$ make -j16
+
+	-> -j8 is more stable then -j16 i would adive not exceed the j8 limit
+
+	//////////////////https://source.android.com/setup/build/building/////////////////////////
+
+
+
+Some Error I encounter for Specific Builds
+
+aosp_hammerhead-userdebug (Android 6.1 For Nexus 5) : 
+	If you face a clang error at this point, make the following change to art/Android.common_build.mk file:
+	Set the ART_HOST_CLANG flag to false by everywhere
+
+	Also instead runnning make -j4 use LANG=C make -j4 (If you get language error)
+
+	Open_JDK 7 is required for this JDK 8 or 8+ will not work also note that oracle JDK and Open JK are two seprate things 
+	Since Open_JDK 7 and below are depreciated i am attaching link of OpenJDK taken out of system variable of ubuntu extract them using unzip command or else you will only extract incomplete files. Place these at jvm of your machine and add there path, also run update command for java mentioned above
+	link : https://pern-my.sharepoint.com/:u:/g/personal/20100262_lums_edu_pk/EUaaZpDo3H5MnmNImpb7Rw8Bw2aESuRBrxqgRhJ2jBbhvQ?e=wLOsFX
+
+
+
+aosp_bullhead-userdebug (Android 7.1.1 Nexus 5x and Android 8.0.0 Nexus 5x)
+
+	If you get the error related to flex
+
+	The reason was bison is a 32-bit binary and my ubuntu is 64bit. I had to install libc6:i386,libncurses5:i386,libstdc++6:i386.
+
+	sudo dpkg --add-architecture i386
+	sudo apt-get update
+	sudo apt-get install libc6:i386 libncurses5:i386 libstdc++6:i386
+
+	also
+
+	sudo apt-get update
+	sudo apt-get upgrade
+	sudo apt-get install flex bison
+
+	finally export a path to bashrc
+
+	$ sudo nano ~/.bashrc
+	Add this line at the end of it
+	export LC_ALL=C
+	press ctrl + o followed by ctrl + x
+	then type source ~/.bashrc in the same terminal you are going to type make -j8
+
+
+aosp_angler-userdebug (Android 8.1.1 Nexus 6p):
+	Same as aosp_hammerhead-userdebug (Android 6.1 For Nexus 5)
+
+
+
+
