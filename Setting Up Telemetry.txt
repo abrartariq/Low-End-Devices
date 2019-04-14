@@ -1,24 +1,5 @@
 UDB = USER DEBUG BUILD  
 
--> Make sure your system meets the requirement
--> This is the main link you will using to install telemetry (Remember only Google Phones are supported who's UDB is accessible)
-	https://chromium.googlesource.com/chromium/src/+/master/docs/android_build_instructions.md#System-requirements
--> You need to pause before Two steps
-	=> Setting up the build
-	=> Build Chromium
-
-	== Setting up the build ==
-	 -> First Read the Setting up the build without IMPLEMENTATION
-	 -> You will see that first need Figure out target_cpu
-	 -> First find your CPU by running "adb shell getprop ro.product.cpu.abi"
-	 -> Now the target_cpu accordingly
-
-
-	== Build Chromium ==
-	 -> Before Running  "autoninja -C out/Default chrome_public_apk" read the Multiple Chrome APK Targets first to know the exact version of chrome (all of the following commands will be changed accordingly to your choice)
-
--> You need to only follow the link till "Build Content shell" 
--> After that you need set User Debug Build on your Device
 -> USER DEBUG BUILD is the big brother of rooting your phone.
 -> If you have the USER DEBUG BUILD files available for your device then you are in LUCK. Skip to step of flashing UDB
 
@@ -111,6 +92,19 @@ UDB = USER DEBUG BUILD
 	-> -j8 is more stable then -j16 i would adive not exceed the j8 limit
 
 	//////////////////https://source.android.com/setup/build/building/////////////////////////
+
+	-> For Flashing you can follow this link
+		https://source.android.com/setup/build/running.html#flashing-a-device
+		your terminal from where you are flashing must the path of your output files e.g /WORKING_DIRECTORY/out/target/product/your build code/
+
+		Here, you may encounter an error that the output directory is not set
+		To resolve it, set the variable ANDROID_PRODUCT_OUT to the absolute path till out/target/product/your build code directory (e.g. hammerhead)
+
+		$ sudo nano ~/.bashrc
+		Add this line at the end of it
+		export ANDROID_PRODUCT_OUT=/home/your_user_name/WORKING_DIRECTORY/out/target/product/your build code
+		press ctrl + o followed by ctrl + x
+		then type source ~/.bashrc in the same terminal you are going to type make -j8
 
 
 
