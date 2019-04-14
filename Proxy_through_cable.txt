@@ -1,0 +1,186 @@
+Idea
+	idea is to route mobile traffic at localhost:XXXX of mobile. Then route it to mitmproxy on system
+
+Some Pre Requirments:
+Install pip3 followed by mitmproxy
+Install ADB
+Rooted Phone
+You need android 5.0 atleast
+
+
+Installing ADB
+sudo apt install android-tools-adb
+
+Installing pip3
+	--> sudo apt install python3-pip
+
+Installing mitmproxy and run mitmproxy
+	optional (only run this incase of error) sudo apt-get install python3-dev python3-pip libffi-dev libssl-dev
+	--> sudo pip3 install mitmproxy
+	--> After installing type "mitmproxy -s script.py" (script.py is your written python script a sample script is posted below, It should be in same directory where file is present) 
+
+
+If mitmproxy is giving error while installing then you can download the executable directly from the this link choose latest version mitmproxy-******-linux.tar.gz
+	--> https://mitmproxy.org/downloads/
+	--> There will three binaries    ======>    mitmdump mitmproxy mitmweb
+	--> For this case you will run ./mitmproxy -s script.py
+
+Now choose a port for adb comunication (on which your you will forward your request to mitmproxy via adb PS => MITM by default works on 8080)
+	--> For this demo we choose 7777 
+    --> you can choose anythinjg from 1024 to 65536 if it's not already in use by another app
+
+Now you have to check if the device is recognized by adb
+    --> After conecting the phone (with usb debuging enabled) type adb devices (you will get a number followed by "XXXXXXXXXXXXXXX device")
+    --> This will require permission from your mobile device
+    --> If part one is not showing the exact string then first produce it
+
+///////////////////////////////////////////////////////Commands To be entered inside adb///////////////////////////////////////////////////////
+Now access adb shell (Press enter after every command)
+	--> Type "adb shell" in terminal 
+	--> Then type "su"
+	--> then type "settings list global" you also use grep here for "http_proxy"
+	--> you will get these type of lines
+				global_http_proxy_exclusion_list=
+				global_http_proxy_host=null
+				global_http_proxy_password=null
+				global_http_proxy_port=null
+				global_http_proxy_username=null
+				global_proxy_pac_url=
+
+				or only this line
+				global_proxy_pac_url=
+
+	--> if port and host are not null or empty then first remove the proxy
+
+Removing the Proxy_of android
+	---> Enter these commands
+				settings delete global http_proxy
+				settings delete global global_http_proxy_host
+				settings delete global global_http_proxy_port
+				settings delete global global_http_proxy_exclusion_list	
+
+			Note: Deleting the settings does not remove the http proxy immediately, but only after a reboot, which makes its usage cumbersome.
+
+Setting Up system wide http level Proxy for android (for our setup host = localhost and port = 7777)
+
+		Either (host = abd and port = 123) 	(One line)
+
+			settings put global http_proxy abc:123 # in one shot
+
+		or:									(MultiLine not recomended)
+
+			settings put global global_http_proxy_host abc
+			settings put global global_http_proxy_port 123
+			settings put global global_http_proxy_exclusion_list a,b
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+After Setting up mobile enter this command in linux terminal
+	---> adb reverse tcp:7777 tcp:8080
+		This sets up a reverse port forward on your phone, tablet, emulator, development device of choice, etc. Any request sent to port 7777 on your phone is forwarded over the USB cable to port 8080 of your development machine. On 8080 mitmproxy will run.
+
+
+To clean up firstly set the proxy in your wi-fi settings back to None, then run
+
+	---> adb reverse remove tcp:7777
+
+You can also do
+
+	--->adb reverse --remove-all
+
+To List all reverse ports
+
+	---> adb reverse --list
+
+
+If mitmproxy is not running first run it with script then install it's certificate on mobile using mit.it link.
+
+
+To run mahimahi webrecord (Record webpages so that you can replay them later)
+
+0) Enable Forwarding sudo sysctl -w net.ipv4.ip_forward=1
+1) Install MahiMahi (go to their link its rather straightforward)
+2) Start a webrecord shell using following command
+	mm-webrecord [path to the directory where you want to record]
+3) Reverse tether the phone using the above commands (assuming phone's global proxy is set)
+	run command adb reverse tcp:7777 tcp:8080
+4) Start mitmproxy with an additional flag
+	./mitmproxy --ssl-insecure
+	--ssl-insecure is necessary to block out all the certificate validation checks, its better to add additional flags in android's chrome
+	at this point the phone should have internet connection, and all of its http traffic is recorded in the directory. 
+	
+5) Use tmux to make additional sessions in case if u want to any other utility with mitmproxy simultaaneously
+6) To automate webpage recording, I am going to use WprofX, to automate webpage fetching on the mobile, you can use any other utility to do that. 
+7) Add the list of websites in the "live_test.txt" file in WprofX directory.
+8) run WprofM using command,
+	adb forward tcp:9222 localabstract:chrome_devtools_remote
+	python3 main.py
+
+
+
+To replay sessions, 
+1) run mahi mahi webreplay shell
+	mm-webreplay [path to directory with recorded data]
+2) Reverse tether the phone
+	run command adb reverse tcp:7777 tcp:8080
+3) Start mitmproxy
+	./mitmproxy --ssl-insecure
+4) You should be able to access recorded websites now, you can  valdiate by turning the internet off and go to same websites.
+
+
+$ Fix the linux's limit on max number of open files! otherwise you wont be able to record more than 1000 requests.
+
+
+
+ENJOY
+
+
+Refrences 
+	https://afterecho.uk/blog/proxying-network-requests-over-the-usb-cable.html
+	https://github.com/Genymobile/gnirehtet/issues/4
+
+
+
+
+Template of Content of Script.py
+
+import mitmproxy
+import os
+
+main_dict = {}
+blacklist = ["yandex","100.64.0.2"] 
+
+def response(flow):
+    for i in blacklist:
+        if i in str(flow.request.pretty_url):
+            return
+
+    global main_dict
+    if flow.request.pretty_url in main_dict:
+        return
+
+    try:
+        if flow.request.method == "GET":
+            main_dict[flow.request.pretty_url] = flow.response
+            with open('/home/ab/Desktop/reqmap','bw+') as f:
+        
+    except Exception as e:
+        with open('/home/ab/Desktop/rsperr','bw+') as errf:
+            errf.write(str(e))
+
+def request(flow):
+    global main_dict
+    try:
+        if  flow.request.method == "GET" and "100.64.0.2" not in str(flow.request.pretty_url):
+            if flow.request.pretty_url in main_dict:
+                flow.response = main_dict [flow.request.pretty_url]
+    except Exception as e:
+        with open('/home/ab/Desktop/reqerr','bw+') as errf:
+            errf.write(str(e))
+
+
+
+
+
+
