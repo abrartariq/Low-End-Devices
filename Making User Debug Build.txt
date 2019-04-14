@@ -1,6 +1,4 @@
-UDB = USER DEBUG BUILD  
-
--> USER DEBUG BUILD is the big brother of rooting your phone.
+-> USER DEBUG BUILD is like a big brother of rooting your phone.
 -> If you have the USER DEBUG BUILD files available for your device then you are in LUCK. Skip to step of flashing UDB
 
 	-> if the above is not true, then my condolences, becuase now you have to build the OS from source code.
@@ -66,13 +64,13 @@ UDB = USER DEBUG BUILD
 
 	and hit the Enter key.
 
-	///////////////////These Command are also standard procedure of building///////////////////
+	///////////////////These Command are standard procedure of building//////////////////////
 
 	To accommodate the new binaries you must initiate a full rebuild, so set the environment:
 	$ . build/envsetup.sh
 	$ lunch aosp_hammerhead-userdebug (hammerhead was the name of build for Nexus 5x)
 		You can check the name of your build:
-			https://developers.google.com/android/drivers (Search for your device Name (5x name was hammerhead))
+			https://source.android.com/setup/build/running#selecting-device-build ((Nexus 5 name was hammerhead))
 	
 	And make the synthetic target 'clobber' in order to clean:
 
@@ -111,9 +109,9 @@ UDB = USER DEBUG BUILD
 
 Some Error I encounter for Specific Builds
 
-aosp_hammerhead-userdebug (Android 6.1 For Nexus 5) : 
+aosp_hammerhead-userdebug (Android 6.0.1 For Nexus 5) : 
 	If you face a clang error at this point, make the following change to art/Android.common_build.mk file:
-	Set the ART_HOST_CLANG flag to false by everywhere
+	Set the ART_HOST_CLANG flag to false everywhere
 
 	Also instead runnning make -j4 use LANG=C make -j4 (If you get language error)
 
@@ -150,7 +148,5 @@ aosp_bullhead-userdebug (Android 7.1.1 Nexus 5x and Android 8.0.0 Nexus 5x)
 
 aosp_angler-userdebug (Android 8.1.1 Nexus 6p):
 	Same as aosp_hammerhead-userdebug (Android 6.1 For Nexus 5)
-
-
 
 
