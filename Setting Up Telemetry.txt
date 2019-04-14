@@ -85,13 +85,13 @@ UDB = USER DEBUG BUILD
 
 	and hit the Enter key.
 
-	///////////////////These Command are also standard procedure of building///////////////////
+	///////////////////These Command are standard procedure of building//////////////////////
 
 	To accommodate the new binaries you must initiate a full rebuild, so set the environment:
 	$ . build/envsetup.sh
 	$ lunch aosp_hammerhead-userdebug (hammerhead was the name of build for Nexus 5x)
 		You can check the name of your build:
-			https://developers.google.com/android/drivers (Search for your device Name (5x name was hammerhead))
+			https://source.android.com/setup/build/running#selecting-device-build ((Nexus 5 name was hammerhead))
 	
 	And make the synthetic target 'clobber' in order to clean:
 
@@ -108,7 +108,7 @@ UDB = USER DEBUG BUILD
 		or 
 	$ make -j16
 
-	-> -j8 is more stable then -j16 i would adive not exceed the j8 limit
+	-> -j8 is more stable then -j16 i would adivce not to exceed the j8 limit
 
 	//////////////////https://source.android.com/setup/build/building/////////////////////////
 
@@ -130,9 +130,9 @@ UDB = USER DEBUG BUILD
 
 Some Error I encounter for Specific Builds
 
-aosp_hammerhead-userdebug (Android 6.1 For Nexus 5) : 
+aosp_hammerhead-userdebug (Android 6.0.1 For Nexus 5) : 
 	If you face a clang error at this point, make the following change to art/Android.common_build.mk file:
-	Set the ART_HOST_CLANG flag to false by everywhere
+	Set the ART_HOST_CLANG flag to false everywhere
 
 	Also instead runnning make -j4 use LANG=C make -j4 (If you get language error)
 
