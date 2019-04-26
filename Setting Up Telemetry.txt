@@ -131,7 +131,7 @@ UDB = USER DEBUG BUILD
 Some Error I encounter for Specific Builds
 
 aosp_hammerhead-userdebug (Android 6.0.1 For Nexus 5) : 
-	If you face a clang error at this point, make the following change to art/Android.common_build.mk file:
+	If you face a clang error at this point, make the following change to art/Build/Android.common_build.mk file:
 	Set the ART_HOST_CLANG flag to false everywhere
 
 	Also instead runnning make -j4 use LANG=C make -j4 (If you get language error)
